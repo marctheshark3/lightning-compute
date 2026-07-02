@@ -1,0 +1,10 @@
+*.log
+*.bak
+models/
+llama.cpp/
+__pycache__/
+.env
+*.swp
+.DS_Store
+node_modules/
+dist/

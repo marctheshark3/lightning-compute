@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lightning Compute — Distributed GPU Farm Architecture</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: #020617;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #22d3ee;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    .header h1::before {
+      content: '';
+      width: 10px;
+      height: 10px;
+      background: #22d3ee;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    .header p {
+      color: #94a3b8;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+    .diagram-card {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 1200px;
+      margin-bottom: 2rem;
+    }
+    .summary-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+      width: 100%;
+      max-width: 1200px;
+    }
+    .card {
+      background: #1e293b;
+      border-radius: 8px;
+      padding: 1.5rem;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .card-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    .card-dot.cyan { background: #22d3ee; }
+    .card-dot.emerald { background: #34d399; }
+    .card-dot.amber { background: #fbbf24; }
+    .card h3 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #f1f5f9;
+    }
+    .card ul {
+      list-style: none;
+      font-size: 0.8rem;
+      color: #cbd5e1;
+    }
+    .card li {
+      padding: 0.25rem 0;
+      padding-left: 1rem;
+      position: relative;
+    }
+    .card li::before {
+      content: '•';
+      position: absolute;
+      left: 0;
+      color: #64748b;
+    }
+    svg {
+      width: 100%;
+      height: auto;
+    }
+    .footer {
+      margin-top: 2rem;
+      color: #64748b;
+      font-size: 0.75rem;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Lightning Compute — Distributed GPU Farm</h1>
+    <p>Distributed inference cluster with role-based node allocation via Tailscale</p>
+  </div>
+
+  <div class="diagram-card">
+    <svg viewBox="0 0 1100 600" xmlns="http://www.w3.org/2000/svg">
+      <!-- Background Grid -->
+      <defs>
+        <pattern id="grid" width="40" height="40" patternUnits="userSpaceUse">
+          <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.5"/>
+        </pattern>
+        <!-- Arrow Markers -->
+        <marker id="arrow-cyan" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#22d3ee"/>
+        </marker>
+        <marker id="arrow-emerald" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#34d399"/>
+        </marker>
+        <marker id="arrow-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#fbbf24"/>
+        </marker>
+      </defs>
+      
+      <rect width="1100" height="600" fill="url(#grid)"/>
+      
+      <!-- TAILSCALE NETWORK BOUNDARY -->
+      <rect x="50" y="50" width="1000" height="500" rx="12" fill="rgba(136, 19, 55, 0.1)" stroke="#fb7185" stroke-width="2" stroke-dasharray="8,4"/>
+      <text x="60" y="75" fill="#fb7185" font-size="12" font-weight="600">TAILSCALE NETWORK (Secure)</text>
+      
+      <!-- CLIENT REQUEST FLOW -->
+      <g transform="translate(100, 250)">
+        <rect x="0" y="0" width="120" height="60" rx="6" fill="rgba(30, 41, 59, 0.5)" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="60" y="25" text-anchor="middle" fill="#94a3b8" font-size="10" font-weight="600">CLIENT</text>
+        <text x="60" y="45" text-anchor="middle" fill="#64748b" font-size="8">(Marc/Jenna/Phone)</text>
+        
+        <!-- Arrow to LiteLLM -->
+        <line x1="120" y1="30" x2="220" y2="30" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow-cyan)"/>
+        <text x="170" y="20" fill="#64748b" font-size="8" text-anchor="middle">HTTPS</text>
+      </g>
+      
+      <!-- LITELLM PROXY -->
+      <g transform="translate(250, 220)">
+        <rect x="0" y="0" width="180" height="120" rx="8" fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1.5"/>
+        <rect x="0" y="0" width="180" height="120" rx="8" fill="#0f172a"/>
+        <rect x="0" y="0" width="180" height="120" rx="8" fill="rgba(6, 78, 59, 0.4)"/>
+        
+        <text x="90" y="25" text-anchor="middle" fill="#34d399" font-size="12" font-weight="700">LITELLM PROXY</text>
+        <text x="90" y="45" text-anchor="middle" fill="#34d399" font-size="10">Port 4000</text>
+        
+        <text x="90" y="70" text-anchor="middle" fill="#cbd5e1" font-size="9">Routes to appropriate</text>
+        <text x="90" y="85" text-anchor="middle" fill="#cbd5e1" font-size="9">node based on task/model</text>
+        
+        <text x="90" y="105" text-anchor="middle" fill="#64748b" font-size="8">Primary orchestration layer</text>
+      </g>
+      
+      <!-- DGX SPARK (PRIMARY) -->
+      <g transform="translate(500, 150)">
+        <rect x="0" y="0" width="200" height="140" rx="8" fill="rgba(8, 51, 68, 0.4)" stroke="#22d3ee" stroke-width="1.5"/>
+        <rect x="0" y="0" width="200" height="140" rx="8" fill="#0f172a"/>
+        <rect x="0" y="0" width="200" height="140" rx="8" fill="rgba(8, 51, 68, 0.4)"/>
+        
+        <text x="100" y="25" text-anchor="middle" fill="#22d3ee" font-size="12" font-weight="700">DGX SPARK</text>
+        <text x="100" y="45" text-anchor="middle" fill="#22d3ee" font-size="10">spark-adb4</text>
+        <text x="100" y="65" text-anchor="middle" fill="#64748b" font-size="8">100.110.151.120</text>
+        
+        <text x="100" y="90" text-anchor="middle" fill="#cbd5e1" font-size="9">Primary Compute Node</text>
+        <text x="100" y="105" text-anchor="middle" fill="#cbd5e1" font-size="9">Multi-GPU, 12+ models</text>
+        <text x="100" y="120" text-anchor="middle" fill="#cbd5e1" font-size="9">Ornith-35B, Heavy, etc.</text>
+      </g>
+      
+      <!-- RTX 3090 MACHINE -->
+      <g transform="translate(500, 350)">
+        <rect x="0" y="0" width="200" height="140" rx="8" fill="rgba(76, 29, 149, 0.4)" stroke="#a78bfa" stroke-width="1.5"/>
+        <rect x="0" y="0" width="200" height="140" rx="8" fill="#0f172a"/>
+        <rect x="0" y="0" width="200" height="140" rx="8" fill="rgba(76, 29, 149, 0.4)"/>
+        
+        <text x="100" y="25" text-anchor="middle" fill="#a78bfa" font-size="12" font-weight="700">RTX 3090</text>
+        <text x="100" y="45" text-anchor="middle" fill="#a78bfa" font-size="10">24GB VRAM / 72GB RAM</text>
+        <text x="100" y="65" text-anchor="middle" fill="#64748b" font-size="8">TBD (Needs Tailscale)</text>
+        
+        <text x="100" y="90" text-anchor="middle" fill="#cbd5e1" font-size="9">Specialist Node</text>
+        <text x="100" y="105" text-anchor="middle" fill="#cbd5e1" font-size="9">~13B models at Q5_K_M</text>
+        <text x="100" y="120" text-anchor="middle" fill="#cbd5e1" font-size="9">Ornith-13B, Qwen Coder</text>
+      </g>
+      
+      <!-- UNKNOWN GPU MACHINE -->
+      <g transform="translate(500, 530)">
+        <rect x="0" y="0" width="200" height="100" rx="8" fill="rgba(120, 53, 15, 0.4)" stroke="#fbbf24" stroke-width="1.5"/>
+        <rect x="0" y="0" width="200" height="100" rx="8" fill="#0f172a"/>
+        <rect x="0" y="0" width="200" height="100" rx="8" fill="rgba(120, 53, 15, 0.4)"/>
+        
+        <text x="100" y="25" text-anchor="middle" fill="#fbbf24" font-size="12" font-weight="700">UNKNOWN GPU</text>
+        <text x="100" y="45" text-anchor="middle" fill="#fbbf24" font-size="10">VRAM/RAM: TBD</text>
+        <text x="100" y="65" text-anchor="middle" fill="#64748b" font-size="8">TBD (Needs Tailscale)</text>
+        
+        <text x="100" y="85" text-anchor="middle" fill="#cbd5e1" font-size="9">Capacity Node</text>
+      </g>
+      
+      <!-- CONNECTIONS -->
+      <!-- Client to LiteLLM -->
+      <line x1="220" y1="250" x2="250" y2="280" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow-cyan)"/>
+      
+      <!-- LiteLLM to DGX Spark -->
+      <line x1="430" y1="260" x2="500" y2="220" stroke="#22d3ee" stroke-width="1.5" marker-end="url(#arrow-emerald)"/>
+      <text x="465" y="240" fill="#64748b" font-size="8" text-anchor="middle">Primary</text>
+      
+      <!-- LiteLLM to RTX 3090 -->
+      <line x1="430" y1="300" x2="500" y2="390" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#arrow-emerald)"/>
+      <text x="465" y="345" fill="#64748b" font-size="8" text-anchor="middle">Specialist</text>
+      
+      <!-- LiteLLM to Unknown GPU -->
+      <line x1="430" y1="320" x2="500" y2="530" stroke="#fbbf24" stroke-width="1.5" marker-end="url(#arrow-emerald)"/>
+      <text x="465" y="425" fill="#64748b" font-size="8" text-anchor="middle">Overflow</text>
+      
+      <!-- Legend -->
+      <g transform="translate(750, 50)">
+        <rect x="0" y="0" width="280" height="180" rx="6" fill="rgba(15, 23, 42, 0.8)" stroke="#334155" stroke-width="1"/>
+        
+        <text x="15" y="25" fill="#f1f5f9" font-size="10" font-weight="600">LEGEND</text>
+        
+        <line x1="15" y1="40" x2="50" y2="40" stroke="#22d3ee" stroke-width="2"/>
+        <text x="60" y="44" fill="#cbd5e1" font-size="9">Primary Node (DGX Spark)</text>
+        
+        <line x1="15" y1="60" x2="50" y2="60" stroke="#a78bfa" stroke-width="2"/>
+        <text x="60" y="64" fill="#cbd5e1" font-size="9">Specialist Node (RTX 3090)</text>
+        
+        <line x1="15" y1="80" x2="50" y2="80" stroke="#fbbf24" stroke-width="2"/>
+        <text x="60" y="84" fill="#cbd5e1" font-size="9">Capacity Node (Unknown)</text>
+        
+        <line x1="15" y1="100" x2="50" y2="100" stroke="#34d399" stroke-width="2"/>
+        <text x="60" y="104" fill="#cbd5e1" font-size="9">Request Flow</text>
+        
+        <line x1="15" y1="120" x2="50" y2="120" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4,2"/>
+        <text x="60" y="124" fill="#cbd5e1" font-size="9">Tailscale Network</text>
+        
+        <rect x="15" y="135" width="35" height="20" fill="rgba(8, 51, 68, 0.4)" stroke="#22d3ee"/>
+        <text x="60" y="150" fill="#cbd5e1" font-size="9">Frontend/Primary</text>
+        
+        <rect x="15" y="155" width="35" height="20" fill="rgba(76, 29, 149, 0.4)" stroke="#a78bfa"/>
+        <text x="60" y="170" fill="#cbd5e1" font-size="9">Specialist GPU</text>
+      </g>
+    </svg>
+  </div>
+
+  <div class="summary-cards">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-dot cyan"></div>
+        <h3>DGX Spark (Primary)</h3>
+      </div>
+      <ul>
+        <li>Multi-GPU compute</li>
+        <li>12+ models loaded</li>
+        <li>Ornith-35B, Heavy, etc.</li>
+        <li>Tailscale: 100.110.151.120</li>
+      </ul>
+    </div>
+    
+    <div class="card">
+      <div class="card-header">
+        <div class="card-dot emerald"></div>
+        <h3>RTX 3090 (Specialist)</h3>
+      </div>
+      <ul>
+        <li>24GB VRAM, 72GB RAM</li>
+        <li>~13B models at Q5_K_M</li>
+        <li>Ornith-13B, Qwen Coder</li>
+        <li>Status: TBD (needs Tailscale)</li>
+      </ul>
+    </div>
+    
+    <div class="card">
+      <div class="card-header">
+        <div class="card-dot amber"></div>
+        <h3>Unknown GPU (Overflow)</h3>
+      </div>
+      <ul>
+        <li>VRAM/RAM: TBD</li>
+        <li>Capacity expansion</li>
+        <li>Handles overflow/load</li>
+        <li>Status: TBD (needs hardware spec)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>Lightning Compute — Distributed GPU Farm | Architecture v1.0 | 2026-06-28</p>
+  </div>
+</body>
+</html>
