@@ -1,0 +1,8 @@
+# Example addition for central litellm_config.yaml when 3090 is ready
+# - model_name: 3090-specialist
+#   litellm_params:
+#     model: openai/Qwen2.5-14B-Instruct-Q5_K_M.gguf   # or whatever you assign
+#     api_base: http://3090-rig.tailf9bab6.ts.net:8080/v1   # or 100.x.x.x
+#     api_key: sk-dummy
+#   model_info:
+#     max_input_tokens: 32768
