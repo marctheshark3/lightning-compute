@@ -3,7 +3,7 @@
 **Goal**: Tailscale-secured private network fabric for all local GPU/CPU nodes. Unified access via LiteLLM proxy. Easy handoff/bootstrap for new machines (starting with the RTX 3090 rig). Hermes can run anywhere and consume the cluster safely.
 
 **Current State (as of 2026-07)**
-- DGX Spark: Primary node. Multiple llama.cpp servers (heavy 35B-class on 8080, light 14B on 8081, ornith-35b/9b, etc.) + LiteLLM proxy on 4000.
+- DGX Spark: Primary/central. llama.cpp containers + vLLM containers (including NVFP4 Qwen3.6 variants launched via repo-style or generic) + LiteLLM on 4000. Example: `qwen36-nvfp4` already wired to a vLLM backend.
 - litellm_config.yaml defines aliases (tron, heavy-coder, yori/light-general, ornith-*, embeddings).
 - Tailscale active (DGX at 100.110.151.120 / spark-adb4.tailf9bab6.ts.net).
 - Docs: README.md + architecture.html (diagram showing Tailscale boundary, central LiteLLM, DGX primary, 3090 specialist TBD, capacity nodes).
@@ -175,7 +175,7 @@ Store the key securely; share one-time or reusable with ACL scoping.
 - Central LiteLLM on DGX or move to a dedicated lightweight gateway node?
 - Use magic DNS everywhere or mix with IPs?
 - Store master key in Tailscale + env or separate secret?
-- vLLM on 3090 for throughput or stick with llama.cpp for consistency?
+- vLLM (generic or "select from repo" like MiaAI-Lab NVFP4 wrappers) vs llama.cpp decision per role/hardware. Both supported and coexist via LiteLLM.
 - How much auto-discovery vs explicit config in litellm_config?
 
 Update this plan as we execute. Track progress in repo.
@@ -191,3 +191,31 @@ Update this plan as we execute. Track progress in repo.
 6. Wire the 3090.
 
 This gives you a clean, private, skills-driven, Tailscale-native distributed local compute fabric that grows with your hardware and keeps Hermes flexible and safe.
+
+## Updated: Bundled Hermes Skill + Practical Target-to-Central Flow (as of 2026-07-01)
+
+### The Skill: tailnet-llm-node
+- Lives in-repo at `skills/tailnet-llm-node/SKILL.md`.
+- Explicitly extends/bundles `llama-cpp-local-serving` + `vllm-local-serving`.
+- Supports "select image from repo" (clone + start.sh of things like MiaAI-Lab/Qwen3.6-27B-NVFP4-vLLM) as well as generic vLLM and GGUF.
+- Provides target bootstrap guidance, structured REGISTRATION BLOCK output, central registration, and agent handoff file generation.
+- Loading for bundled "single flow":
+  /skill tailnet-llm-node
+  /skill llama-cpp-local-serving
+  Then instruct: "run the full bundled tailnet-llm-node setup..."
+
+### Practical Workflow (user-described)
+1. Run skill (or bootstrap/join-node.sh) on the target compute machine → gets Tailscale + inference + details.
+2. Capture the registration block / generated file.
+3. Add the details to shared folder or pass to central Hermes instance.
+4. Run the bundled skill on central (or appropriate Hermes) to update LiteLLM config, create the Tailscale-backed connection, and wire Hermes.
+
+### Generated Files for Agents
+- templates/agent-cluster-node-setup.md (self-contained prompt another agent can follow).
+
+### Bundling & Easy Invocation
+Skills are loaded then driven by natural language for the "run these bundled skills to setup everything" experience. The generated template file provides a portable artifact when direct skill loading on the receiver is not immediate.
+
+See skills/tailnet-llm-node/SKILL.md for the full definition and recipes.
+
+**Wizard UX note**: The primary user entrypoint is now the polished `bootstrap/join-node.sh` wizard (one-liner + flags). UX patterns (structured logging, detection, prereqs, clean output) were adapted from MiaAI-Lab/HermesGW-Desktop-setup with credit. The wizard is the "easy" path; the skills provide the Hermes-orchestrated version of the same flow.

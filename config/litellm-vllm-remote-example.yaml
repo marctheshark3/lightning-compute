@@ -1,0 +1,23 @@
+# Example: adding a remote vLLM node (e.g. from MiaAI-Lab style repo or generic)
+# to the central litellm_config.yaml
+#
+# Use the Tailnet DNS (preferred) or 100.x IP from the registration block.
+
+- model_name: rig-qwen27-nvfp4
+  litellm_params:
+    model: openai/nvidia/Qwen3.6-27B-NVFP4
+    api_base: http://<node-tailnet-dns-or-ip>:8888/v1
+    api_key: sk-dummy
+    merge_reasoning_content: true
+  model_info:
+    max_input_tokens: 262144
+    max_output_tokens: 32768
+
+# Another example (generic vLLM 7B on a laptop node)
+- model_name: laptop-7b
+  litellm_params:
+    model: openai/Qwen/Qwen2.5-7B-Instruct
+    api_base: http://laptop-node.tailnet.ts.net:8000/v1
+    api_key: sk-dummy
+  model_info:
+    max_input_tokens: 32768

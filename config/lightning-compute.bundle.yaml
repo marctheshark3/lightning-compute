@@ -1,0 +1,30 @@
+name: lightning-compute
+description: 'Lightning Compute: Tailscale cluster node bootstrap + central LiteLLM
+  registration + Hermes wiring'
+skills:
+- tailnet-llm-node
+- llama-cpp-local-serving
+- vllm-local-serving
+instruction: 'Use the tailnet-llm-node skill patterns together with llama-cpp-local-serving and vllm-local-serving.
+
+  Prefer the easy wizard on target machines:
+  - curl the join-node.sh wizard (or run it locally)
+  - It does hardware + network detection, prereqs, launch (vllm repo/generic or llama.cpp), validation, and writes a rich registration block.
+
+  Key points:
+  - Hardware detection first (nvidia-smi, RAM, arch).
+  - Choose or let it suggest backend + model (vLLM for repo images like MiaAI-Lab/Qwen NVFP4 is excellent).
+  - Wizard supports --backend, --repo, --model, --port, --clean, TS_AUTHKEY=...
+  - Registration block includes Tailnet DNS/IP, backend, port, served model, suggested LiteLLM alias.
+
+  On central:
+  - Take the registration block (or file).
+  - Use /lightning-compute (or the skills) to patch central litellm_config.yaml using the Tailscale address.
+  - Verify with curl to the central proxy.
+
+  Always use Tailscale DNS or 100.x IPs for cross-node. Never localhost.
+
+  When user says "set up the 3090", "bootstrap this laptop", "add Mia Qwen vLLM node", etc. — run or guide the wizard then register centrally.
+
+  Invoke via /lightning-compute for the full bundled experience.
+  '
