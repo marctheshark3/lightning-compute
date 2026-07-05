@@ -18,7 +18,7 @@ Connecting multiple local GPU machines (DGX Spark, RTX 3090, laptops, etc.) via 
 
 ```bash
 # Simplest
-curl -fsSL https://raw.githubusercontent.com/marctheshark3/lightning-compute/main/bootstrap/join-node.sh | bash
+curl -fsSL https://raw.githubusercontent.com/marctheshark3/lightning-compute/master/bootstrap/join-node.sh | bash
 
 # With Tailscale key + vLLM repo image (e.g. Mia's Qwen)
 TS_AUTHKEY=tskey-... bash bootstrap/join-node.sh --backend=vllm --repo=https://github.com/MiaAI-Lab/Qwen3.6-27B-NVFP4-vLLM
@@ -76,7 +76,7 @@ You can also copy the versioned bundle definition:
 ### Quickstart (Target → Central Registration)
 
 1. On the target machine (e.g. 3090):
-   - Obtain a Tailscale authkey from an existing node.
+   - Obtain a Tailscale authkey from an existing node (via the admin console at https://login.tailscale.com/admin/settings/keys — create a reusable key with tags like `tag:llm-node`).
    - Either run `bootstrap/join-node.sh` directly or let the Hermes skill drive it.
    - The process performs hardware detection (`uname -m`, `nvidia-smi`, RAM) and outputs a structured **Registration Block**.
 

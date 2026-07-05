@@ -10,7 +10,7 @@
 #   - vLLM (generic or "select image from repo" wrappers, e.g. MiaAI-Lab NVFP4)
 #
 # Quick start (target machine):
-#   curl -fsSL https://raw.githubusercontent.com/marctheshark3/lightning-compute/main/bootstrap/join-node.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/marctheshark3/lightning-compute/master/bootstrap/join-node.sh | bash
 #
 # With options:
 #   curl ... | bash -s -- --backend=vllm --repo=https://github.com/MiaAI-Lab/Qwen3.6-27B-NVFP4-vLLM

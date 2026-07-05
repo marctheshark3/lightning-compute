@@ -50,7 +50,8 @@ Extend the single-node pattern to a private Tailscale-backed cluster (e.g. DGX S
 4. Bootstrap for fresh nodes: one-liner script that installs Tailscale, joins with authkey, detects hardware (arch/VRAM), launches the server using the docker patterns above, and prints the backend URL to wire into central config.
 
 **Handoff / bootstrap flow (condensed):**
-- Generate Tailscale key on existing node: `tailscale auth key create --reusable --tags=tag:llm-node`.
+- Generate Tailscale auth key from the admin console (CLI key creation removed in recent versions):  
+  Go to https://login.tailscale.com/admin/settings/keys → "Generate auth key" → enable Reusable, set expiry, add tags (e.g. `tag:llm-node`).
 - On fresh machine (e.g. 3090): `TS_AUTHKEY=... bash join-node.sh --role=specialist --hardware=3090`.
 - Script responsibilities: Tailscale join, Docker/NVIDIA setup, model download, launch (reuse LD_LIBRARY_PATH / -c / -ngl patterns), announce backend.
 - Differentiate by hardware (aarch64 high-context on Spark vs x86 lighter models on 3090).

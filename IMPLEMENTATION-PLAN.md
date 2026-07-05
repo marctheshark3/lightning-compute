@@ -55,7 +55,7 @@
 **Target UX**:
 ```bash
 # On the 3090 machine (fresh Ubuntu or whatever)
-curl -fsSL https://raw.githubusercontent.com/youruser/lightning-compute/main/bootstrap/join-node.sh | bash -s -- --role=specialist --hardware=3090
+curl -fsSL https://raw.githubusercontent.com/marctheshark3/lightning-compute/master/bootstrap/join-node.sh | bash -s -- --role=specialist --hardware=3090
 # Or with explicit Tailscale key
 TS_AUTHKEY=tskey-... curl ... | bash
 ```
@@ -78,9 +78,14 @@ TS_AUTHKEY=tskey-... curl ... | bash
 - Script branches on detection.
 
 **Tailscale key generation (on any existing tailnet machine)**:
-```bash
-tailscale login --authkey=$(tailscale auth key create --reusable --tags=tag:llm-node --expiry=90d)
-```
+Generate reusable auth keys with tags via the web admin console (CLI `auth key create` is no longer available in recent Tailscale versions like 1.98+):
+
+1. Visit https://login.tailscale.com/admin/settings/keys
+2. Click "Generate auth key"
+3. Check "Reusable", set expiry (90d), add tags like `tag:llm-node`
+4. Copy the `tskey-...` value
+
+Then use `TS_AUTHKEY=tskey-...` when bootstrapping nodes.
 Store the key securely; share one-time or reusable with ACL scoping.
 
 **Deliverables for bootstrap**:

@@ -104,7 +104,7 @@ For headless targets, fall back to the standalone script in the repo.
 
 ## Procedure
 1. On target machine (e.g. fresh 3090, or laptop with 7B):
-   - Get Tailscale auth key from an existing node.
+   - Get Tailscale auth key from an existing node (admin console → Keys → Generate auth key, make it reusable + tagged).
    - Perform hardware detection (see section above).
    - Choose backend:
      - llama.cpp: `TS_AUTHKEY=*** bash bootstrap/join-node.sh --role=specialist --hardware=3090`
