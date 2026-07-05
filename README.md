@@ -18,7 +18,7 @@ Connecting multiple local GPU machines (DGX Spark, RTX 3090, laptops, etc.) via 
 
 ```bash
 # Simplest
-curl -fsSL https://raw.githubusercontent.com/marctheshark/lightning-compute/main/bootstrap/join-node.sh | bash
+curl -fsSL https://raw.githubusercontent.com/marctheshark3/lightning-compute/main/bootstrap/join-node.sh | bash
 
 # With Tailscale key + vLLM repo image (e.g. Mia's Qwen)
 TS_AUTHKEY=tskey-... bash bootstrap/join-node.sh --backend=vllm --repo=https://github.com/MiaAI-Lab/Qwen3.6-27B-NVFP4-vLLM

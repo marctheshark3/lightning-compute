@@ -200,7 +200,7 @@ LiteLLM snippet:
 **Preferred (easiest)**: Run the wizard directly:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/marctheshark/lightning-compute/main/bootstrap/join-node.sh | bash -s -- --backend=vllm --repo=https://github.com/MiaAI-Lab/Qwen3.6-27B-NVFP4-vLLM
+curl -fsSL https://raw.githubusercontent.com/marctheshark3/lightning-compute/main/bootstrap/join-node.sh | bash -s -- --backend=vllm --repo=https://github.com/MiaAI-Lab/Qwen3.6-27B-NVFP4-vLLM
 ```
 
 Or via bundle:
