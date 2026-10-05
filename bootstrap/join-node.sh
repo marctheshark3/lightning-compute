@@ -402,8 +402,9 @@ Role hint: ${ROLE}
     max_input_tokens: 32768
 
 --- Test from central (after wiring) ---
-curl -H "Authorization: Bearer sk-dgx-local" http://<central-tailnet-host>:4000/v1/models
-curl -H "Authorization: Bearer sk-dgx-local" http://<central-tailnet-host>:4000/v1/chat/completions \
+Set LITELLM_API_KEY securely in your shell before running these commands.
+curl -H "Authorization: Bearer \${LITELLM_API_KEY:?Set LITELLM_API_KEY}" http://<central-tailnet-host>:4000/v1/models
+curl -H "Authorization: Bearer \${LITELLM_API_KEY:?Set LITELLM_API_KEY}" http://<central-tailnet-host>:4000/v1/chat/completions \
   -d '{"model":"'${MODEL_NAME_SUGGESTED}'","messages":[{"role":"user","content":"hello"}],"max_tokens":16}'
 
 --- Next steps ---

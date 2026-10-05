@@ -4,6 +4,11 @@ models/
 llama.cpp/
 __pycache__/
 .env
+.env.*
+!.env.example
+api-key
+settings.before-spark-*.json
+/litellm_config.yaml
 *.swp
 .DS_Store
 node_modules/

@@ -28,8 +28,8 @@ Class-level skill for running GGUF models with llama.cpp server in Docker contai
 
 ## Hermes Integration
 
-After LiteLLM is healthy on :4000 with master key `sk-dgx-local`:
-- `hermes model` → Custom / OpenAI-compatible → base_url `http://localhost:4000/v1`, key `sk-dgx-local`.
+After LiteLLM is healthy on :4000 with master key `<your-litellm-api-key>`:
+- `hermes model` → Custom / OpenAI-compatible → base_url `http://localhost:4000/v1`, key `<your-litellm-api-key>`.
 - Models appear as the aliases defined in `litellm_config.yaml` (e.g. `tron`, `yori`).
 
 ## Tailscale Multi-Node / Cluster Extension

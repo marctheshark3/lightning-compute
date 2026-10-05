@@ -8,7 +8,7 @@
 - Tailscale active (DGX at 100.110.151.120 / spark-adb4.tailf9bab6.ts.net).
 - Docs: README.md + architecture.html (diagram showing Tailscale boundary, central LiteLLM, DGX primary, 3090 specialist TBD, capacity nodes).
 - Operational: docker-compose.llm-pair.yml, health scripts, llm-recipes/ with downloads + benchmarks.
-- Hermes (tron profile): Points to localhost:4000/v1 + sk-dgx-local. Local models available via aliases.
+- Hermes (tron profile): Points to localhost:4000/v1 + <your-litellm-api-key>. Local models available via aliases.
 - 3090 (24GB VRAM / 72GB RAM): Documented for ~13B-class models. Not yet on tailnet or running inference.
 
 **Key Principles**
@@ -45,7 +45,7 @@
 - Config lives in this repo (versioned). Central node pulls on deploy or uses git + restart.
 
 ### Hermes Layer
-- Any Hermes instance (any device) points `base_url` to the central proxy's Tailscale address + `sk-dgx-local`.
+- Any Hermes instance (any device) points `base_url` to the central proxy's Tailscale address + `<your-litellm-api-key>`.
 - Full power of Hermes (tools, delegation, skills, memory) while heavy lifting stays on protected nodes.
 - Bonus: Run Hermes *on* a compute node for lowest latency when local.
 - Malware / isolation win: Compromised client device only sees the proxy. No model weights, no direct GPU access.

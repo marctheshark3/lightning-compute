@@ -157,7 +157,7 @@ In tailnet-llm-node flows, detection now suggests backend + example repo/image.
 Central LiteLLM (usually on primary) is the only thing Hermes clients point at:
 ```
 base_url: http://spark-adb4.tailf9bab6.ts.net:4000/v1
-key: sk-dgx-local
+key: <your-litellm-api-key>
 ```
 
 All cross-connect happens over Tailscale. No public exposure.
