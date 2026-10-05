@@ -1,5 +1,9 @@
 # T3 Code with Spark local models
 
+**Status: experimental.** Model selection and gateway tool calls are verified, but
+repeated coding runs can produce malformed tool calls or time out. This optional
+integration still needs model/backend tuning for reliable coding.
+
 T3 Code can use the Spark's existing Qwen model through a separate **Spark Local**
 Codex provider instance. The working connection is:
 

@@ -17,7 +17,11 @@ Connecting multiple local GPU machines (DGX Spark, RTX 3090, laptops, etc.) via 
 ### T3 Code with Spark Local Models
 
 Use the Spark's existing Qwen model for T3 Code coding sessions through a separate
-**Spark Local** provider:
+**Spark Local** provider.
+
+**Experimental:** the picker and gateway connection work, but repeated coding tests
+have produced malformed tool calls or timed out. Coding reliability still needs
+tuning. Install the optional provider with:
 
 ```bash
 python3 scripts/setup-t3-spark.py install
@@ -34,6 +38,14 @@ reliability and host sandbox limitations. The live gateway currently listens on
 `127.0.0.1:4000`; direct access through the Tailnet IP requires separate gateway
 routing or a tunnel. See [credential handling and repository checks](docs/security.md)
 before sharing configuration or pushing changes.
+
+### CI and Deployment
+
+[GitHub Actions](.github/workflows/checks.yml) runs script syntax checks,
+credential-handling tests, and secret scanning on pull requests and pushes to
+`master`. Pull requests also scan their incoming commits for secrets.
+Deployment is manual through the installer; there is no automatic deployment to
+the Spark.
 
 ### Easy Wizard (one-liner on any machine)
 
