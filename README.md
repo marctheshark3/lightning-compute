@@ -14,6 +14,27 @@ Connecting multiple local GPU machines (DGX Spark, RTX 3090, laptops, etc.) via 
 
 **vLLM support is now first-class** ("select images from repos" or generic vllm/vllm-openai). Everything still cross-connects via central LiteLLM over Tailscale.
 
+### T3 Code with Spark Local Models
+
+Use the Spark's existing Qwen model for T3 Code coding sessions through a separate
+**Spark Local** provider:
+
+```bash
+python3 scripts/setup-t3-spark.py install
+```
+
+The installer checks streaming Responses and tool calls, asks for the LiteLLM key,
+and adds an isolated Codex configuration and T3 provider instance. In a new T3
+thread, open the model picker, click **SL / Spark Local**, and select
+**Qwen3.6 35B A3B · Spark**.
+
+See [the setup and verification guide](docs/t3-spark.md) for the working Spark
+configuration, a coding smoke test, remote connections, and the observed model
+reliability and host sandbox limitations. The live gateway currently listens on
+`127.0.0.1:4000`; direct access through the Tailnet IP requires separate gateway
+routing or a tunnel. See [credential handling and repository checks](docs/security.md)
+before sharing configuration or pushing changes.
+
 ### Easy Wizard (one-liner on any machine)
 
 ```bash

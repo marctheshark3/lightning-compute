@@ -1,0 +1,50 @@
+name: Checks
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Check scripts and credential handling
+        run: |
+          for script in bootstrap/*.sh scripts/*.sh; do
+            bash -n "$script"
+          done
+          python3 -m py_compile scripts/setup-t3-spark.py scripts/check-codex-spark.py
+          python3 -m unittest discover -s tests -v
+
+  secrets:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+      - name: Install checksum-verified Gitleaks
+        env:
+          VERSION: 8.30.1
+        run: |
+          archive="gitleaks_${VERSION}_linux_x64.tar.gz"
+          release="https://github.com/gitleaks/gitleaks/releases/download/v${VERSION}"
+          cd "$RUNNER_TEMP"
+          curl --fail --silent --show-error --location --remote-name "$release/$archive"
+          curl --fail --silent --show-error --location --remote-name "$release/gitleaks_${VERSION}_checksums.txt"
+          awk -v archive="$archive" '$2 == archive' "gitleaks_${VERSION}_checksums.txt" > gitleaks.sha256
+          sha256sum --check gitleaks.sha256
+          tar -xzf "$archive" gitleaks
+      - name: Scan current files and incoming commits
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          "$RUNNER_TEMP/gitleaks" dir . --redact=100 --no-banner
+          if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+            "$RUNNER_TEMP/gitleaks" git . --log-opts="${BASE_SHA}..HEAD" --redact=100 --no-banner
+          fi
